@@ -59,7 +59,7 @@ class ProcessLogs extends Process implements Module {
 		$table = $this->modules->get('MarkupAdminDataTable');
 		$table->setSortable(true); 
 		$table->setEncodeEntities(false);
-		$header = array('Date','User','Page','Type','Description');
+		$header = array('Date&emsp;&emsp;&emsp;&emsp;','User','Page','Type','Description');
 		$table->headerRow($header);
 
 		$lines = array_reverse(file($this->config->paths->logs .$_SESSION['ProcessLog']['selectedLog'], FILE_IGNORE_NEW_LINES));
@@ -77,7 +77,7 @@ class ProcessLogs extends Process implements Module {
 			
 			foreach($errors as $error) {
 				$table->row(array(
-					date('d.m.Y', $error['timestamp']).'&emsp;<br />'.date('H:i:s', $error['timestamp']),
+					date($this->config->dateFormat, $error['timestamp']),
 					$error['user'].'&emsp;',
 					(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/'),
 					'<nobr>'.$error['type'].'&emsp;</nobr>',
