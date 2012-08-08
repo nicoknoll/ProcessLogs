@@ -5,7 +5,7 @@ class ProcessLogs extends Process implements Module {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Logs', 
-			'version' => '1.03',
+			'version' => '1.03', 
 			'summary' => 'Let you see your logs.',
 			'singular' => true, 
 			'autoload' => false, 
