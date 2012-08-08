@@ -5,7 +5,7 @@ class ProcessLogs extends Process implements Module {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Logs', 
-			'version' => '1.02', 
+			'version' => '1.03', 
 			'summary' => 'Let you see your logs.',
 			'singular' => true, 
 			'autoload' => false, 
@@ -53,6 +53,8 @@ class ProcessLogs extends Process implements Module {
 			$_SESSION['ProcessLog']['selectedLog'] = $_POST['file'];
 		}
 		
+		$errors = array();
+		
 		$this->setFuel('processHeadline', ucfirst(basename($_SESSION['ProcessLog']['selectedLog'], '.txt')).' Log');
 		$this->fuel->breadcrumbs->add(new Breadcrumb('../', 'Logs'));
 	
@@ -65,7 +67,9 @@ class ProcessLogs extends Process implements Module {
 		$lines = array_reverse(file($this->config->paths->logs .$_SESSION['ProcessLog']['selectedLog'], FILE_IGNORE_NEW_LINES));
 
 		foreach($lines as $line) {
-			preg_match('%^(.*) (.*): (.*):(.*):(.*):(.*)$%AUis', $line, $matches);
+			if(!preg_match('%^(.*) (.*)	(.*)	(.*)	(.*)	(.*)$%AUis', $line, $matches)) {
+				preg_match('%^(.*) (.*): (.*):(.*):(.*):(.*)$%AUis', $line, $matches);
+			}
 			$matches = array_combine(array('full', 'date', 'time', 'user', 'page', 'type', 'description'), $matches);
 			$matches['timestamp'] = strtotime($matches['date'].' '.$matches['time']);
 			unset($matches['date'], $matches['time']);
@@ -77,11 +81,11 @@ class ProcessLogs extends Process implements Module {
 			
 			foreach($errors as $error) {
 				$table->row(array(
-					date($this->config->dateFormat, $error['timestamp']),
+					'<span style="margin-right:20px;float:left;width:75px;">'.date($this->config->dateFormat, $error['timestamp']).'</span>',
 					$error['user'].'&emsp;',
-					(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/'),
+					'<span style="width: 280px;word-break: break-word;float: left;margin-right: 20px;">'.(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/').'</span>',
 					'<nobr>'.$error['type'].'&emsp;</nobr>',
-					$error['description']
+					'<span style="float:left;width:400px;word-break:break-word; ">'.$error['description'].'</span>'
 				));	
 			}
 
