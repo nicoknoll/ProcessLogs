@@ -5,14 +5,12 @@ class ProcessLogs extends Process implements Module {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Logs', 
-			'version' => '1.10', 
-			'summary' => 'Let you see your logs.',
+			'version' => '120', 
+			'summary' => __('Let you see your logs.'),
 			'singular' => true, 
 			'autoload' => false, 
 			);
 	}
-
-	const adminPageName = 'process-logs';
 
 	public function init() {
 		parent::init();
@@ -28,20 +26,21 @@ class ProcessLogs extends Process implements Module {
 		$logs = glob($this->config->paths->logs.'*');
 
         $field = $this->modules->get("InputfieldSelect");
-        $field->label = 'Select log';
-        $field->description = 'Select the log you want to use.';
+        $field->label = $this->_('Select log');
+        $field->description = $this->_('Select the log you want to use.');
         $field->name = 'file';
+        $field->required = true;
         $i = 0;
         foreach($logs as $log) {
-        	$field->addOption(basename($log), ucfirst(basename($log, '.txt')));
-        	$i++;
+        		$field->addOption(basename($log), ucfirst(basename($log, '.txt')));
+        		$i++;
 		}
         $form->add($field);
 
 
         $field = $this->modules->get("InputfieldButton");
         $field->type = 'submit';
-        $field->value = 'Display the selected log';
+        $field->value = $this->_('Display the selected log');
         $field->name = '';
         $form->add($field);
 
@@ -49,11 +48,12 @@ class ProcessLogs extends Process implements Module {
 	}
 	
 	public function ___executeLog() {
-		if($_POST['file']) {
-			$_SESSION['ProcessLog']['selectedLog'] = $_POST['file'];
+		if($this->input->post['file']) {
+			$_SESSION['ProcessLog']['selectedLog'] = $this->input->post->file;
 		}
 		
 		$errors = array();
+		$button = '';
 		
 		$this->setFuel('processHeadline', ucfirst(basename($_SESSION['ProcessLog']['selectedLog'], '.txt')).' Log');
 		$this->fuel->breadcrumbs->add(new Breadcrumb('../', 'Logs'));
@@ -61,42 +61,48 @@ class ProcessLogs extends Process implements Module {
 		$table = $this->modules->get('MarkupAdminDataTable');
 		$table->setSortable(true); 
 		$table->setEncodeEntities(false);
-		$header = array('Date&emsp;&emsp;&emsp;&emsp;','User','Page','Type','Description');
+		$header = array(
+			$this->_('Date'),
+			$this->_('User'),
+			$this->_('Page'),
+			$this->_('Description')
+		);
 		$table->headerRow($header);
 
 		$lines = array_reverse(file($this->config->paths->logs .$_SESSION['ProcessLog']['selectedLog'], FILE_IGNORE_NEW_LINES));
 
 		foreach($lines as $line) {
-			if(!preg_match('%^(.*) (.*)	(.*)	(.*)	(.*)	(.*)$%AUis', $line, $matches)) {
-				preg_match('%^(.*) (.*): (.*):(.*):(.*):(.*)$%AUis', $line, $matches);
+			if(!preg_match('%^(.*) (.*)	(.*)	(.*)	(.*)$%AUis', $line, $matches)) {
+				preg_match('%^(.*) (.*): (.*):(.*):(.*)$%AUis', $line, $matches);
 			}
-			$matches = array_combine(array('full', 'date', 'time', 'user', 'page', 'type', 'description'), $matches);
+			$matches = array_combine(array('full', 'date', 'time', 'user', 'page', 'description'), $matches);
 			$matches['timestamp'] = strtotime($matches['date'].' '.$matches['time']);
 			unset($matches['date'], $matches['time']);
 			
 			$errors[] = $matches;
 		}
-
+	
 		if(count($errors)) {
 			
 			foreach($errors as $error) {
 				$table->row(array(
-					'<span style="margin-right:20px;float:left;width:75px;">'.date($this->config->dateFormat, $error['timestamp']).'</span>',
+					'<span style="width:140px;margin-right:20px;float:left;">'.date($this->config->dateFormat, $error['timestamp']).'</span>',
 					$error['user'].'&emsp;',
-					'<span style="width: 280px;word-break: break-word;float: left;margin-right: 20px;">'.(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/').'</span>',
-					'<nobr>'.$error['type'].'&emsp;</nobr>',
-					'<span style="float:left;width:400px;word-break:break-word; ">'.$error['description'].'</span>'
+					'<span style="word-break: break-word;float: left;margin-right: 20px;">'.(($error['page'] != '/?/') ? '<a href="'.$error['page'].'">'.$error['page'].'</a>&emsp;' : '/?/').'</span>',
+					'<span style="float:left;word-break:break-word; ">'.$error['description'].'</span>'
 				));	
 			}
 
-		}
 		
-		$button = $this->modules->get("InputfieldButton");
-		$button->type = 'submit';
-		$button->id = 'clear_log';
-		$button->value = 'Clear Log';
+		
+			$button = $this->modules->get("InputfieldButton");
+			$button->type = 'submit';
+			$button->id = 'clear_log';
+			$button->value = $this->_('Clear Log');
+		
+		}
 
-		return '<form id="form" action="../clear/" method="post">' .$table->render() . $button->render() . '</form>';
+		return '<form id="form" action="../clear/" method="post">' .$table->render() . (($button) ? $button->render() : $this->_('The log file is empty.')) . '</form>';
 	}
 	
 	public function ___executeClear() {
@@ -108,23 +114,23 @@ class ProcessLogs extends Process implements Module {
 	public function ___install() {
 
 		if(ProcessWire::versionMajor == 2 && ProcessWire::versionMinor < 1) {
-			throw new WireException("This module requires ProcessWire 2.1 or newer"); 
+			throw new WireException($this->_("This module requires ProcessWire 2.2 or newer")); 
 		}
 
 		$page = $this->getInstalledPage();
-		$this->message("Installed to {$page->path}"); 
-		if($page->parent->name == 'setup') $this->message("Click to your 'Setup' page to manage your files."); 
+		$this->message(sprintf($this->_("Installed to %s."), $page->path)); 
+		if($page->parent->name == 'setup') $this->message($this->_("Click to your 'Setup' page to manage your files.")); 
 	}
 
 	protected function getInstalledPage() {
 		$parent = $this->pages->get("name=setup"); 
-		$page = $parent->child("name=" . self::adminPageName); 
+		$page = $parent->child("name=process-logs"); 
 
 		if(!$page->id) { 	
 			$page = new Page();
 			$page->parent = $parent; 
 			$page->template = $this->templates->get('admin');
-			$page->name = self::adminPageName; 
+			$page->name = 'process-logs'; 
 			$page->title = "Logs";
 			$page->process = $this; 
 			$page->sort = $parent->numChildren;
@@ -136,7 +142,7 @@ class ProcessLogs extends Process implements Module {
 	public function ___uninstall() {
 		$page = $this->getInstalledPage();	
 		if($page->id) { 
-			$this->message("Removed {$page->path}");
+			$this->message(sprintf($this->_("Removed %s."), $page->path));
 			$this->pages->delete($page); 
 		}
 	}
