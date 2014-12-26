@@ -1,0 +1,89 @@
+.InputfieldMarkup .InputfieldContent {
+	margin:0px;
+	padding:0px !important;
+	//border:0px !important;
+}
+
+.InputfieldMarkup.noborder .InputfieldContent {
+	border:0px !important;
+}
+
+.content .AdminDataList tr td:nth-child(1):after {
+width:140px;
+float:left;
+content:'';
+}
+
+.content .AdminDataList tr td:nth-child(2):after {
+width:140px;
+float:left;
+content:'';
+}
+
+.content .AdminDataList tr td:nth-child(3) span {
+width:400px;
+float:left;
+content:'';
+word-break:break-word;
+}
+
+.content .AdminDataList tr td:nth-child(4) span {
+width:400px;
+float:left;
+content:'';
+word-break:break-word;
+}
+
+@media all and (max-width: 1420px) {
+	.content .AdminDataList tr td:nth-child(1):after {
+	width:100px;
+	}
+	
+	.content .AdminDataList tr td:nth-child(2):after {
+	width:100px;
+	}
+	
+	.content .AdminDataList tr td:nth-child(3) span {
+	width:300px;
+	}
+	
+	.content .AdminDataList tr td:nth-child(4) span {
+	width:300px;
+	}
+}
+
+@media all and (max-width: 1140px) {
+	.content .AdminDataList tr td:nth-child(1):after {
+	width:80px;
+	}
+
+	.content .AdminDataList tr td:nth-child(2):after {
+	width:80px;
+	}
+
+	.content .AdminDataList tr td:nth-child(3) span {
+	width:200px;
+	}
+
+	.content .AdminDataList tr td:nth-child(4) span {
+	width:300px;
+	}
+}
+
+@media all and (max-width: 980px) {
+	.content .AdminDataList tr td:nth-child(1):after {
+	width:60px;
+	}
+
+	.content .AdminDataList tr td:nth-child(2):after {
+	width:60px;
+	}
+
+	.content .AdminDataList tr td:nth-child(3) span {
+	width:180px;
+	}
+
+	.content .AdminDataList tr td:nth-child(4) span {
+	width:220px;
+	}
+}
