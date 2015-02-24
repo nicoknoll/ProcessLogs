@@ -1,8 +1,5 @@
 # ProcessLogs
-
-**A log reader for ProcessWire.**
-
-*For Processwire 2.5+*
+**[DISCONTINUED] This is now a core functionality.**
 
 ![](screenshot.png)
 
